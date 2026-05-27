@@ -1,0 +1,32 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mcp-maruru-browser"
+version = "0.9.0"
+description = "Local MCP server for controlling Playwright with a persistent Chrome profile."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [
+  { name = "maruru" }
+]
+dependencies = [
+  "mcp",
+  "playwright"
+]
+
+[tool.hatch.build.targets.wheel]
+only-include = [
+  "mcp_maruru_browser_server.py"
+]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "mcp_maruru_browser_server.py",
+  "README.md",
+  "CHANGELOG.md",
+  "LICENSE",
+  "SECURITY.md"
+]
