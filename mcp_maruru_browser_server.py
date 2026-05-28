@@ -3381,33 +3381,33 @@ async def _handle_browser_popup_flow(args: dict[str, Any]) -> list[types.TextCon
 # --- メイン ---
 
 SERVER_INSTRUCTIONS = """\
-maruru-browser: 永続Chromeプロファイルを流用するPlaywright操作MCP（40+ツール）。
+maruru-browser: Playwright MCP using a persistent Chrome profile (40+ tools).
 
-# カテゴリ別ガイド（埋没しがちなツールを意識的に検討）
-- 基本操作: browser_navigate / browser_evaluate / browser_click / browser_type / browser_wait_for / browser_tabs
-- AI連携（直接プロンプト送信、ブラウザ操作不要）: chatgpt_ask / gemini_ask / grok_ask / perplexity_search / x_search / google_search
-- 高度な操作（手で組まずに専用ツールを使う）:
-  * browser_popup_flow: OAuth/共有のポップアップ「クリック→出現→閉鎖→元タブURL変化」を1コール
-  * browser_tabs action=latest: 新タブにフォーカスを取り損ねた時の救済
-  * browser_tabs action=wait_close: ポップアップが閉じるまで待つ
-  * wait_for_navigation: SPAの画面遷移待ち（browser_wait_forより適切）
-  * iframe_evaluate: iframe内のJSはこれ。browser_evaluateでは届かない
-  * record_replay: 同じ操作を繰り返す（jitter付きでbot検知緩和）
-  * browser_handle_dialog: alert/confirm/promptの自動応答ポリシー
-  * generic_form_fill: ラベル/placeholderから推測してフォーム一括入力
+# Tool categories (consider easily-missed ones)
+- Core: browser_navigate / browser_evaluate / browser_click / browser_type / browser_wait_for / browser_tabs
+- AI bridges (direct prompt, no browser ops): chatgpt_ask / gemini_ask / grok_ask / perplexity_search / x_search / google_search
+- Specialized (prefer over manual composition):
+  * browser_popup_flow: one-call OAuth/share popup flow (click -> popup -> close -> origin URL change)
+  * browser_tabs action=latest: rescue when a new tab opened but focus wasn't followed
+  * browser_tabs action=wait_close: wait for popup tab to close
+  * wait_for_navigation: SPA route change wait (better than browser_wait_for)
+  * iframe_evaluate: run JS inside an iframe (browser_evaluate cannot reach)
+  * record_replay: repeat an action sequence with jitter (mitigates bot detection)
+  * browser_handle_dialog: auto-response policy for alert/confirm/prompt
+  * generic_form_fill: fill forms by inferring fields from label/placeholder
 
-# 落とし穴（環境依存の挙動）
-- browser_snapshot は環境によっては AttributeError になる → browser_evaluate で document.body.innerText 等を取って代替
-- クリックやキー押下で新タブが開く操作は follow_new_tab=true を必ず指定（手動の tabs.switch より安全）
-- x_search は未ログイン時 0件返却。google_search/perplexity_search にフォールバック
-- 認証付きPDF/バイナリ取得: browser_evaluate で fetch(url, {credentials:'include'}) → ArrayBuffer → btoa() か、cookies_get で取り出して外部HTTPクライアントへ
-- popup/新タブはPlaywright的に同等扱い。NextDNS等のDoH/フィルタがOAuth popupを遮断する場合あり
+# Gotchas
+- browser_snapshot may raise AttributeError in some envs; fall back to browser_evaluate (document.body.innerText etc.)
+- Clicks/keys that open a new tab: always set follow_new_tab=true (safer than manual tabs.switch)
+- x_search returns 0 hits when not logged in; fall back to google_search / perplexity_search
+- Auth-gated PDF/binary download: browser_evaluate -> fetch(url, {credentials:'include'}) -> ArrayBuffer -> btoa(), or cookies_get and hand off to an external HTTP client
+- Popups and new tabs are equivalent in Playwright; DoH filters (e.g. NextDNS) may block OAuth popups
 
-# AI連携の使い分け
-- 知識検索/最新情報: perplexity_search（ソース付き）
-- リアルタイム/速報/SNS文脈: x_search（要ログイン）+ google_search
-- 長文/コード生成: chatgpt_ask（プロジェクト指示適用）/ gemini_ask
-- 率直な見解/逆張り: grok_ask
+# AI bridge selection
+- Knowledge / fresh info with sources: perplexity_search
+- Realtime / breaking / social context: x_search (login required) + google_search
+- Long-context / code gen: chatgpt_ask (project instructions applied) / gemini_ask
+- Candid / contrarian take: grok_ask
 """
 
 
@@ -3419,7 +3419,7 @@ async def main():
                 read_stream, write_stream,
                 InitializationOptions(
                     server_name="maruru-browser",
-                    server_version="0.9.1",
+                    server_version="0.9.2",
                     capabilities=server.get_capabilities(
                         notification_options=NotificationOptions(),
                         experimental_capabilities={}

@@ -4,6 +4,16 @@ All notable changes to `mcp-maruru-browser` will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.9.2] - 2026-05-28
+
+### Changed — server instructions を英語化
+
+- v0.9.1 で導入した `SERVER_INSTRUCTIONS` を日本語から英語に書き換え。
+  内容は同一だが、英語の方が同一情報量あたりのトークン数が少なく、
+  毎セッション送信されるシステム指示のコストを削減できる。
+- LLM側は英語の方が処理コストが低いケースが多く、指示遵守率も
+  特に劣らないため、英語化のメリットが大きい。
+
 ## [0.9.1] - 2026-05-28
 
 ### Added — サーバ初期化時の利用ガイド注入
