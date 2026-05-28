@@ -4,6 +4,19 @@ All notable changes to `mcp-maruru-browser` will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.9.1] - 2026-05-28
+
+### Added — サーバ初期化時の利用ガイド注入
+
+- `InitializationOptions` に `instructions` を追加。MCP接続したクライアント
+  （Claude Code/Desktop, Codex, Gemini など）に対し、起動時に
+  「カテゴリ別ツールガイド + 埋没ツール + 落とし穴 + AI連携の使い分け」を
+  システム指示として自動配信する。
+- これにより、ツール数が40+と多くなった本サーバでも、LLM側が
+  `browser_popup_flow` / `wait_for_navigation` / `iframe_evaluate` /
+  `record_replay` などの専用ツールの存在を見落とすケースを減らす狙い。
+- 既存ツールの動作変更はなし。後方互換。
+
 ## [0.9.0] - 2026-05-27
 
 ### Added — 新規ウインドウ/ポップアップ対応

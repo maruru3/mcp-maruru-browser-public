@@ -3380,6 +3380,37 @@ async def _handle_browser_popup_flow(args: dict[str, Any]) -> list[types.TextCon
 
 # --- メイン ---
 
+SERVER_INSTRUCTIONS = """\
+maruru-browser: 永続Chromeプロファイルを流用するPlaywright操作MCP（40+ツール）。
+
+# カテゴリ別ガイド（埋没しがちなツールを意識的に検討）
+- 基本操作: browser_navigate / browser_evaluate / browser_click / browser_type / browser_wait_for / browser_tabs
+- AI連携（直接プロンプト送信、ブラウザ操作不要）: chatgpt_ask / gemini_ask / grok_ask / perplexity_search / x_search / google_search
+- 高度な操作（手で組まずに専用ツールを使う）:
+  * browser_popup_flow: OAuth/共有のポップアップ「クリック→出現→閉鎖→元タブURL変化」を1コール
+  * browser_tabs action=latest: 新タブにフォーカスを取り損ねた時の救済
+  * browser_tabs action=wait_close: ポップアップが閉じるまで待つ
+  * wait_for_navigation: SPAの画面遷移待ち（browser_wait_forより適切）
+  * iframe_evaluate: iframe内のJSはこれ。browser_evaluateでは届かない
+  * record_replay: 同じ操作を繰り返す（jitter付きでbot検知緩和）
+  * browser_handle_dialog: alert/confirm/promptの自動応答ポリシー
+  * generic_form_fill: ラベル/placeholderから推測してフォーム一括入力
+
+# 落とし穴（環境依存の挙動）
+- browser_snapshot は環境によっては AttributeError になる → browser_evaluate で document.body.innerText 等を取って代替
+- クリックやキー押下で新タブが開く操作は follow_new_tab=true を必ず指定（手動の tabs.switch より安全）
+- x_search は未ログイン時 0件返却。google_search/perplexity_search にフォールバック
+- 認証付きPDF/バイナリ取得: browser_evaluate で fetch(url, {credentials:'include'}) → ArrayBuffer → btoa() か、cookies_get で取り出して外部HTTPクライアントへ
+- popup/新タブはPlaywright的に同等扱い。NextDNS等のDoH/フィルタがOAuth popupを遮断する場合あり
+
+# AI連携の使い分け
+- 知識検索/最新情報: perplexity_search（ソース付き）
+- リアルタイム/速報/SNS文脈: x_search（要ログイン）+ google_search
+- 長文/コード生成: chatgpt_ask（プロジェクト指示適用）/ gemini_ask
+- 率直な見解/逆張り: grok_ask
+"""
+
+
 async def main():
     """MCPサーバーのメインエントリポイント"""
     try:
@@ -3388,11 +3419,12 @@ async def main():
                 read_stream, write_stream,
                 InitializationOptions(
                     server_name="maruru-browser",
-                    server_version="0.9.0",
+                    server_version="0.9.1",
                     capabilities=server.get_capabilities(
                         notification_options=NotificationOptions(),
                         experimental_capabilities={}
-                    )
+                    ),
+                    instructions=SERVER_INSTRUCTIONS,
                 )
             )
     finally:
